@@ -6,9 +6,6 @@ const port = process.env.PORT || 5000;
 
 connectDB()
 .then(()=> {
-    app.get('/',(req,res)=>{
-        res.send("hi");
-    })
     app.listen(port, ()=> {
         console.log(`SERVER is RUNNING @ http://localhost:${port}`);
     })

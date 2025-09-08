@@ -47,7 +47,7 @@ const loginUser = asyncHandler(async (req,res) => {
         $or : [{email}, {phoneNumber}, {userName}]
     })
     if(!user) throw new ApiError(400,"USER NOT REGISTERED");
-    
+
     const isPasswordValid = await user.isPasswordValid(password);
     if(!isPasswordValid) throw new ApiError(400, "INVALID CREDENTIALS");
 
@@ -56,7 +56,7 @@ const loginUser = asyncHandler(async (req,res) => {
 
     res.cookie("refreshToken", refreshToken);
 
-    const response = new ApiResponse(201,"USER REGISTERED SUCCESSFULLY",{
+    const response = new ApiResponse(201,"USER LOGGED IN SUCCESSFULLY",{
         user : {
             id: user._id,
             fullName: user.fullName,
@@ -66,5 +66,6 @@ const loginUser = asyncHandler(async (req,res) => {
         },
         accessToken
     }) 
+    res.status(201).json(response)
 })
 export {registerUser,loginUser}

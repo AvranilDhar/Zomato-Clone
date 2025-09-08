@@ -44,7 +44,7 @@ userSchema.pre('save', async function (next) {
 //!custome functions of this userSchema
 //! (1)
 
-userSchema.method.isPasswordValid = async function (reqPassword){
+userSchema.methods.isPasswordValid = async function (reqPassword){
     return await bcrypt.compare(reqPassword,this.password);
 }
 
