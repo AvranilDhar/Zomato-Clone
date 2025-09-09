@@ -1,4 +1,5 @@
 import { User } from "../models/user.model.js";
+import { FoodPartner } from "../models/foodPartner.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -28,7 +29,7 @@ const registerUser = asyncHandler(async(req , res) => {
 
     res.cookie("refreshToken", refreshToken);
 
-    const response = new ApiResponse(201,"USER REGISTERED SUCCESSFULLY",{
+    const response = new ApiResponse(200,"USER REGISTERED SUCCESSFULLY",{
         user : {
             id: user._id,
             fullName: user.fullName,
@@ -49,7 +50,7 @@ const loginUser = asyncHandler(async (req,res) => {
     if(!user) throw new ApiError(400,"USER NOT REGISTERED");
 
     const isPasswordValid = await user.isPasswordValid(password);
-    if(!isPasswordValid) throw new ApiError(400, "INVALID CREDENTIALS");
+    if(!isPasswordValid) throw new ApiError(401, "INVALID CREDENTIALS");
 
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
@@ -68,4 +69,64 @@ const loginUser = asyncHandler(async (req,res) => {
     }) 
     res.status(201).json(response)
 })
-export {registerUser,loginUser}
+
+const registerFoodPartner = asyncHandler(async (req,res)=>{
+    const {fullName , userName , email , phoneNumber , password } = req.body;
+    const ifRegistered = await FoodPartner.findOne({
+        $or : [{email}, {userName}, {phoneNumber}]
+    })
+    if(ifRegistered) throw new ApiError(402, "FOODPARTNER ALREADY EXISTS");
+    const foodPartner = await FoodPartner.create({
+        fullName,
+        userName,
+        email,
+        phoneNumber,
+        password
+    });
+    const accessToken = foodPartner.generateAccessToken();
+    const refreshToken = foodPartner.generateRefreshToken();
+
+    res.cookie("refreshToken", refreshToken);
+
+    const response = new ApiResponse(202, "FOODPARTNER REGISTERED SUCCESSFULLY" , {
+        foodPartner : {
+            _id : this._id,
+            fullName : this.fullName,
+            userName : this.userName, 
+            email : this.email,
+            phoneNumber : this.phoneNumber
+        },
+        accessToken
+    });
+
+    res.status(202,response);
+})
+
+const loginFoodPartner = asyncHandler(async function (req,res) {
+    const { fullName , userName , email , phoneNumber , password} = req.body;
+
+    const ifFoodPartner = await FoodPartner.findOne({
+        $or : [{email}, {userName}, {phoneNumber}]
+    });
+    if(!ifFoodPartner) throw new ApiError(404,"FOODPARTNER NOT REGISTERED");
+
+    const isPasswordValid = await ifFoodPartner.isPasswordValid(password);
+
+    if(!isPasswordValid) throw new ApiError(401, "INVALID CREDENTIALS");
+
+    const accessToken = ifFoodPartner.generateAccessToken();
+    const refreshToken = ifFoodPartner.generateRefreshToken();
+
+    res.cookie("refreshToken", refreshToken);
+    const response = new ApiResponse(204 , "FOODPARTNER LOGGED IN SUCCESFULLY",{
+        ifFoodPartner : {
+            _id : this._id,
+            fullName : this.fullName,
+            userName : this.userName, 
+            email : this.email,
+            phoneNumber : this.phoneNumber
+        },accessToken
+    });
+    res.status(204,response);
+})
+export {registerUser,loginUser, registerFoodPartner , loginFoodPartner}
