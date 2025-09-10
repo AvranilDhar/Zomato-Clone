@@ -70,6 +70,12 @@ const loginUser = asyncHandler(async (req,res) => {
     res.status(201).json(response)
 })
 
+const logoutUser = asyncHandler(async function (req,res) {
+    res.clearCookie("refreshToken");
+    const response = new ApiResponse(203, "USER LOGGED OUT SUCCESSFULLY");
+    res.status(203).json(response);
+})
+
 const registerFoodPartner = asyncHandler(async (req,res)=>{
     const {fullName , userName , email , phoneNumber , password } = req.body;
     const ifRegistered = await FoodPartner.findOne({
@@ -118,7 +124,7 @@ const loginFoodPartner = asyncHandler(async function (req,res) {
     const refreshToken = ifFoodPartner.generateRefreshToken();
 
     res.cookie("refreshToken", refreshToken);
-    const response = new ApiResponse(204 , "FOODPARTNER LOGGED IN SUCCESFULLY",{
+    const response = new ApiResponse(205 , "FOODPARTNER LOGGED IN SUCCESFULLY",{
         ifFoodPartner : {
             _id : this._id,
             fullName : this.fullName,
@@ -127,6 +133,11 @@ const loginFoodPartner = asyncHandler(async function (req,res) {
             phoneNumber : this.phoneNumber
         },accessToken
     });
-    res.status(204,response);
+    res.status(205,response);
 })
-export {registerUser,loginUser, registerFoodPartner , loginFoodPartner}
+const logoutFoodPartner = asyncHandler(async function (req,res) {
+    res.clearCookie("refreshToken");
+    const response = new ApiResponse(203, "FOOD PARTNER LOGGED OUT SUCCESSFULLY");
+    res.status(206).json(response);
+})
+export {registerUser,loginUser, logoutUser , registerFoodPartner , loginFoodPartner , logoutFoodPartner}
